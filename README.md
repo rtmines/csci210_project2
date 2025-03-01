@@ -1,6 +1,6 @@
 # Project 2 - File Tree Simulator
 
-In this project, you will be simulating a Unix file system using a tree. This is based off of section 2.13 in the textbook. Feel free to read that section from the textbook for additional help and ideas.
+In this project, you will be simulating a Unix file system using a tree data structure. This is based off of section 2.13 in the textbook. Feel free to read that section from the textbook for additional help and ideas.
 
 ## Problem Statement
 
@@ -8,13 +8,13 @@ We have seen a lot of useful commands so far, such as: **mkdir**, **rmdir**, **l
 
 A tree is a data structure which you'll see in *Data Structures & Algorithms*, *Discrete Math*, and again in *Algorithms*. For more on trees and dynamic structures, refer to the course textbook sections 2.10-2.13 (Wang, Systems Programming in Unix/Linux). In this project, you are given a starter code, which provides type definitions and helper functions to help you get started.
 
-Your task on this project is to implement the **mkdir** command which will modify a tree that simulates a Linux file system tree, where nodes represent files or directories.
+Your task on this project is to implement the **mkdir** command which will modify a tree that simulates a Unix file system tree, where nodes represent files or directories.
 
-**Important Notes**: In order to implement the **mkdir** command correctly, you will have to implement the two functions in the source file: **mkdir_splitpath.c**. **main.c** and **types.h** files should not me modified. The implementations of the other commands, **rmdir**, **rm**, **ls**, **cd**, **pwd**, and **touch** are provided as compiled object code in **other_commands.o**. For these commands to work correctly, the function **splitPath** has to be correctly implemented by you. More details about the expected behavior of these functions are provided below.
+**Important Notes**: In order to implement the **mkdir** command correctly, you will have to implement the two functions in the source file: **mkdirSplitpath.c**. **main.c** and **types.h** files should not me modified. The implementations of the other commands, **rmdir**, **rm**, **ls**, **cd**, **pwd**, and **touch** are provided as compiled object code in **otherCommands.o**. For these commands to work correctly, the function **splitPath** has to be correctly implemented by you. More details about the expected behavior of these functions are provided below.
 
 ## Solution executable
 
-A complete solution executable, named **main**, is available and can be executed from the command line on isengard. This executable program has all the commands implemented.
+A complete solution executable, named **main**, is available and can be executed from the command line on isengard. An executable that can be run on MacOS ARM64 architecture is also provided. A statically linked version is also available that should run on x86 64 bit architectures. This executable program has all the commands implemented.
 
 When the program is executed you can type the following commands to interact with the simulated file system:
 
@@ -32,6 +32,13 @@ The program prompt is output to stderr. So, if you want to redirect input from a
 
 ```
 ./main < test01.in 2>/dev/null > output.txt
+```
+You can use this apprach to compare your output to the expected outputs provided in the test_cases directory. Example:
+Run your implementation as:
+
+```
+./main < test_cases/test05.in 2>/dev/null > mytest5.out
+diff mytest5.out test_cases/test05.out
 ```
 
 ## The Tree Structure
@@ -86,22 +93,24 @@ The nodes of the tree for this directory structure are shown below:
 
 ## Requirements for the splitPath() function
 
-The function splitPath() with the following signature gets the complete path string to a file or directory as a relative or an absolute path:
+The function splitPath() with the following signature gets the complete path string  (relative or absolute) to a file or directory as input:
 
 ```
 struct NODE* splitPath(char* pathName, char* baseName, char* dirName)
 ```
 
-The character array **pathName** is the path string which is the parameter to the commands, rm, rmdir, ls, cd, touch, mkdir. Note that when no parameter is specified, the path string is initialized to "/" by default. The goal of the splitPath function is to split the path string into two parts: **dirName** and **baseName**, which should character arrays setup by the caller function. The **dirName** is a sequence of directory names that show the path to the **baseName**, which is the name of the target file or directory. For example, for the path string "/a/b/c/f1.txt", "/a/b/c" should be copied over to the **dirName** and "f1.txt" should be copied over to the **baseName**. If the path string contains just the name of the file or directory (which means it refers to a file or directory in the current directory), then the **dirName** should just be an empty string, "", whereas **baseName** should be the same as the pathName (note that instead of direct pointer assignment, you should use string copying functions like strcpy or strncpy). In short, the **dirName** should be the first part of a **pathName** up to (and **excluding**) the last '/'. The rest of the string should be the **baseName**. Example edge cases: if the **pathName** is "/", **dirName** should be "/" and **baseName** should be "", if the **pathName** is "f1.txt", **dirName** should be "" and **baseName** should be "f1.txt"
+The character array **pathName** is the path string which is the parameter to the commands, rm, rmdir, ls, cd, touch, mkdir. **Note that when no parameter is specified, the path string is initialized to "/" by default.** The goal of the splitPath function is to split the path string into two parts: **dirName** and **baseName**, which are character arrays setup by the caller function, i.e., assume that memory is already allocated for them by the caller. The **dirName** is a sequence of directory names that show the path to the **baseName**, which is the name of the target file or directory. For example, for the path string "/a/b/c/f1.txt", "/a/b/c" should be copied over to the **dirName** and "f1.txt" should be copied over to the **baseName**. If the path string contains just the name of the file or directory (which means it refers to a file or directory in the current directory), then the **dirName** should just be an empty string, "", whereas **baseName** should be the same as the pathName (note that instead of direct pointer assignment, you should use string copying functions like strcpy or strncpy). In short, the **dirName** should be the first part of a **pathName** up to (and **excluding**) the last '/'. The rest of the string should be the **baseName**. Example edge cases: if the **pathName** is "/", **dirName** should be "/" and **baseName** should be "", if the **pathName** is "f1.txt", **dirName** should be "" and **baseName** should be "f1.txt"
 
-In addition to setting the values for the **dirName** and **baseName** strings, the splitPath() function should return a pointer to the directory where the target file or directory resides. For example, if the **pathName** is "/a/b/c/f3.txt", splitPath() should return a pointer to the node structure that represents the directory "c". If the **pathName** is "/a/b/c", **dirName** should be set to "/a/b", **baseName** should be set to "c" and the function should return a pointer to the node structure that represents the directory "b".
+In addition to setting the values for the **dirName** and **baseName** strings, the splitPath() function should return a pointer to the node that represents **the parent** directory of the **baseName**. For example, if the **pathName** is "/a/b/c/f3.txt", splitPath() should return a pointer to the node structure that represents the directory "c". If the **pathName** is "/a/b/c", **dirName** should be set to "/a/b", **baseName** should be set to "c" and the function should return a pointer to the node structure that represents the directory "b".
 
-splitPath() shoud print the following message in the standard output (note that the error messages are not to be output to the standard error), if it detects a non-existent directory on the path:
+splitPath() should print the following message in the **standard output** (note that the error messages are not to be output to the standard error for testing purposes) and return NULL, if it detects a non-existent directory on the path:
 
 ```
 ERROR: directory <DIRECTORY> does not exist
 ```
 The directory name that is printed in the error message must be the first non-existent directory when the path is traversed from the root directory.
+
+**splitPath() should return NULL in all ERROR cases**
 
 **Hint:** Set the **baseName** and **dirName** first and traverse the **dirName** using the string tokenizer function `strtok`, splitting the **dirName** with the delimiter "/".
 
@@ -225,17 +234,17 @@ git config --global user.name "Tolga Can"
 Create a private repository for this project under your own user name. For example, I created a private repo named **csci210_project2** and my github username is tolgacan. A private repo can be created from the GitHub web site by going to your repositories after clicking on your profile picture (e.g., https://github.com/tolgacan?tab=repositories) and clicking on the "New" button in the top right corner. After that, you can enter a command sequence similar to the one below to clone the starter repo and copy it to your private repo to work with. The **project2** repo under the organization **CSCI210Mines** is the public repository that contains the starter code.
 
 ```
-git clone git@github.com:CSCI210Mines/project2.git
+git clone git@github.com:CSCI210Mines/project2_spring25.git
 git remote remove origin
 git remote add origin git@github.com:tolgacan/csci210_project2.git  # this is my private repo. replace it with your own private repo
 git branch -M main
 git push -u origin main
 ```
 
-After these commands, you should have a copy of your starter code in your own repo and you can update the **mkdir_splitpath.c** with your solution code and execute the following git commands to push your updates to your own repo:
+After these commands, you should have a copy of your starter code in your own repo and you can update the **mkdirSplitpath.c** with your solution code and execute the following git commands to push your updates to your own repo:
 
 ```
-git add mkdir_splitpath.c
+git add mkdirSplitpath.c
 git commit -m "your commit message here"
 git push -u origin main
 ```
