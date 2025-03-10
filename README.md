@@ -235,6 +235,7 @@ Create a private repository for this project under your own user name. For examp
 
 ```
 git clone git@github.com:CSCI210Mines/project2_spring25.git
+cd project2_spring25
 git remote remove origin
 git remote add origin git@github.com:tolgacan/csci210_project2.git  # this is my private repo. replace it with your own private repo
 git branch -M main
