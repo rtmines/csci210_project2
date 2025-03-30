@@ -21,10 +21,7 @@ struct NODE* getChild(struct NODE* node, char* name) {
 
 //make directory
 void mkdir(char pathName[]){
-    char path[strlen(pathName) + 1];
-    strcpy(path, pathName);
-
-    if (strlen(pathName) == 0) {
+    if (strcmp(pathName, "/") == 0) {
         printf("MKDIR ERROR: no path provided\n");
         return;
     }
@@ -56,27 +53,33 @@ void mkdir(char pathName[]){
 
     new->fileType = 'D';
     new->parentPtr = parentDir;
+    new->siblingPtr = NULL;
+    new->childPtr = NULL;
     strcpy(new->name, baseName);
 
-    printf("MKDIR SUCCESS: node %s successfully created\n", path);
+    printf("MKDIR SUCCESS: node %s successfully created\n", pathName);
 
     return;
 }
 
 //handles tokenizing and absolute/relative pathing options
 struct NODE* splitPath(char* pathName, char* baseName, char* dirName){
-    if (strcmp(pathName, "/") == 0) {
-        strcpy(dirName, pathName);
-        strcpy(pathName, "");
+    char path_temp[strlen(pathName) + 1];
+    strcpy(path_temp, pathName);
+    char* path = path_temp;
+
+    if (strcmp(path, "/") == 0) {
+        strcpy(dirName, path);
+        strcpy(path, "");
         return NULL;
     }
 
     struct NODE* node;
 
-    if (pathName[0] == '/') {
+    if (path[0] == '/') {
         node = root;
         strcpy(dirName, "/");
-        pathName++;
+        path++;
     } else {
         node = cwd;
     }
@@ -85,7 +88,7 @@ struct NODE* splitPath(char* pathName, char* baseName, char* dirName){
     char *token;
     char *nextToken;
 
-    token = strtok(pathName, delim);
+    token = strtok(path, delim);
     nextToken = strtok(NULL, delim);
 
     
